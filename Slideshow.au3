@@ -9,6 +9,8 @@
 ; Dependencies: GDI+
 ; Call _GDIPlus_Startup() before using any function from this UDF and _GDIPlus_Shutdown() after you properly deleted all controls created with this UDF
 ; and there is no further need of any function from this UDF.
+; URL: https://www.autoitscript.com/forum/topic/211445-slideshow-udf/
+; Special thanks to UEZ (https://www.autoitscript.com/forum/profile/29844-uez/) for transition idea and sample code.
 ; ==================================================================================================================================================================================================================
 
 ; #CURRENT# ========================================================================================================================================================================================================
@@ -71,6 +73,8 @@ $__mSlideshows['Max'] = 3		; Maximum numbers of controls. You can increase this 
 ;				* CaptionsFontSize - Font size used for captions [Default: 12]
 ;				* CaptionsFontStyle - Font style used for captions. This can be a combination of these values: 0 - Normal, 1 - Bold, 2 - Italic, 4 - Underline, 8 - Strikethrough [Default: 0]
 ;				* CaptionsTextColor - Text color used for captions [Default: 0xFFFFFFFF]
+;               		* Transition - Enable or disable transitions between slides change slides. This value must be True or False [Default: True]
+;               		* TransitionFrames - Number of frames between transitions [Default: 40]
 ; Return value: 	Success - Returns a map with all properties and settings.
 ;                  	Failure - Returns Null.
 ;				@error = 1 - $avImage is not an array
@@ -91,6 +95,8 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 
 	Local $iImageType = (MapExists($mOptions, 'ImageType') ? $mOptions['ImageType'] : 'Local')
 	Local $iDelay = (MapExists($mOptions, 'Delay') ? $mOptions['Delay'] : 3000)
+    	Local $fTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : False)
+    	Local $iTransitionFrames = (MapExists($mOptions, 'TransitionFrames') ? $mOptions['TransitionFrames'] : 40)
 	Local $fAutoPlay = (MapExists($mOptions, 'Autoplay') ? $mOptions['Autoplay'] : True)
 	Local $fPlayDirection = (MapExists($mOptions, 'PlayDirection') ? $mOptions['PlayDirection'] : True)
 	Local $sErrorFont = (MapExists($mOptions, 'ErrorFont') ? $mOptions['ErrorFont'] : 'Segoe UI')
@@ -134,11 +140,14 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 	$mSlideshow['GUI'] = $hGUI
 	$mSlideshow['Images'] = $avImage
 	$mSlideshow['Index'] = 0
+    	$mSlideshow['PrevIndex'] = 0
 	$mSlideshow['Count'] = $iCount
 	$mSlideshow['Width'] = $iWidth
 	$mSlideshow['Height'] = $iHeight
 	$mSlideshow['Radius'] = $iRadius
 	$mSlideshow['Delay'] = ($iDelay < $__mSlideshows['Refresh'] ? $__mSlideshows['Refresh'] : $iDelay)
+    	$mSlideshow['Transition'] = ($fTransition ? True : False)
+    	$mSlideshow['TransitionFrames'] = $iTransitionFrames
 	$mSlideshow['NoImage'] = __NoImage($iWidth, $iHeight, $iErrorBkColor, $iErrorColor, $sErrorFont, $iErrorFontSize)
 	$mSlideshow['Ctrl'] = GUICtrlCreatePic('', $iX, $iY, $iWidth, $iHeight, ($iRadius > 0 ? Default : 0x1000))	; $SS_SUNKEN
 	$mSlideshow['ShowSlides'] = $fShowSlides
@@ -269,6 +278,7 @@ Func __Slide($mSlideshow = Null, $iEvent = Null)
 	Local $iStop = ($mSlideshow = Null ? $nSlideshows : $mSlideshow['Ref'])
 	Local $mCurrent, $avImage, $hBitmap, $hClone, $hGraphics, $iCount, $hDisplayImage, $hPath, $iWidth, $iHeight, $iRadius
 	Local $iPrevButtonPos, $iNextButtonPos, $hPen, $hFontFamily, $hFont, $hFormat, $tRect, $asCaptions, $nSlideStart
+    	Local $hAttributes, $hTransition, $hTransitionGraphics, $tMatrix
 	Local $hBrush = _GDIPlus_BrushCreateSolid()
 	Local $hPen = _GDIPlus_PenCreate()
 	_GDIPlus_PenSetLineCap($hPen, 2, 2, 2)
@@ -311,7 +321,6 @@ Func __Slide($mSlideshow = Null, $iEvent = Null)
 			_GDIPlus_PathAddArc($hPath, 0, 0, $iRadius * 2, $iRadius * 2, 180, 90)
 			_GDIPlus_PathCloseFigure($hPath)
 			_GDIPlus_GraphicsSetClipPath($hGraphics, $hPath)
-			_GDIPlus_PathDispose($hPath)
 		EndIf
 		_GDIPlus_GraphicsDrawImageRectRect($hGraphics, $hClone, 0, 0, $iWidth, $iHeight, 0, 0, $iWidth, $iHeight)
 		If $mCurrent['ShowSlides'] Then
@@ -357,12 +366,31 @@ Func __Slide($mSlideshow = Null, $iEvent = Null)
 			_GDIPlus_GraphicsDrawLine($hGraphics, $iNextButtonPos + $mCurrent['ButtonsSize'] - 10, Int($iHeight - 20 - $mCurrent['ButtonsSize'] / 2), $iNextButtonPos + 15, $iHeight - $mCurrent['ButtonsSize'] - 8, $hPen)
 			_GDIPlus_GraphicsDrawLine($hGraphics, $iNextButtonPos + $mCurrent['ButtonsSize'] - 10, Int($iHeight - 20 - $mCurrent['ButtonsSize'] / 2), $iNextButtonPos + 15, $iHeight - 32, $hPen)
 		EndIf
-		__BitmapToCtrl($hDisplayImage, $mCurrent['Ctrl'])
+		If $mCurrent['Transition'] Then
+            		For $iOpacity = -1 To 0 Step (1 / $mCurrent['TransitionFrames'])
+                		$hAttributes = _GDIPlus_ImageAttributesCreate()
+                		$hTransition = _GDIPlus_BitmapCreateFromScan0($iWidth, $iHeight)
+                		$hTransitionGraphics = _GDIPlus_ImageGetGraphicsContext($hTransition)
+                		_GDIPlus_GraphicsSetPixelOffsetMode($hTransitionGraphics, 4)
+                		If $iRadius > 0 Then _GDIPlus_GraphicsSetClipPath($hTransitionGraphics, $hPath)
+                		$tMatrix = _GDIPlus_ColorMatrixCreateTranslate(0, 0, 0, $iOpacity)
+                		_GDIPlus_ImageAttributesSetColorMatrix($hAttributes, 0, True, DllStructGetPtr($tMatrix))
+                		_GDIPlus_GraphicsDrawImageRect($hTransitionGraphics, $avImage[$mCurrent['PrevIndex']], 0, 0, $iWidth, $iHeight)
+                		_GDIPlus_GraphicsDrawImageRectRect($hTransitionGraphics, $hDisplayImage, 0, 0, $iWidth, $iHeight, 0, 0, $iWidth, $iHeight, $hAttributes)
+                		__BitmapToCtrl($hTransition, $mCurrent['Ctrl'])
+                		_GDIPlus_GraphicsDispose($hTransitionGraphics)
+                		_GDIPlus_BitmapDispose($hTransition)
+                		_GDIPlus_ImageAttributesDispose($hAttributes)
+            		Next
+        	EndIf
+        	__BitmapToCtrl($hDisplayImage, $mCurrent['Ctrl'])
+        	If $iRadius > 0 Then _GDIPlus_PathDispose($hPath)
 		_GDIPlus_GraphicsDispose($hGraphics)
 		_GDIPlus_BitmapDispose($hClone)
 		_GDIPlus_BitmapDispose($hDisplayImage)
 		$mCurrent['FirstUpdate'] = True
 		$mCurrent['LastUpdate'] = TimerInit()
+        	$mCurrent['PrevIndex'] = $mCurrent['Index']
 		$__mSlideshows[$nIndex] = $mCurrent
 	Next
 	_GDIPlus_PenDispose($hPen)
