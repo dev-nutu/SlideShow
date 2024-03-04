@@ -35,56 +35,56 @@ $__mSlideshows['Max'] = 3           ; Maximum numbers of controls. You can incre
 ; ===============================================================================================================================================================
 
 ; #FUNCTION# ====================================================================================================================================================
-; Name: 		        _GUICtrlSlideshow_Create
-; Description: 		    Creates a slideshow control.
-; Syntax: 		        _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage [, $mOptions = Null])
-; Parameters: 		    $hGUI - The handle of the parent window.
-;			                $iX - Position of the left side of the control.
-;			                $iY - Position of the top side of the control.
-;			                $iW - The width of the control.
-;			                $iH - The height of the control.
-;			                $avImage - An array that contains the images for the slideshow. Each element of this array contains a slide image. This can be an array of local file paths, URLs
-;				                            or raw binary data but can't be mixed data. If the array contains URLs or raw binary data then ImageType must to be set as option.
-;			                $mOptions - [Optional] - A map with all customisable properties (each property it's a key).
-;				                Available properties:
-;				                    * ImageType - load images from $avImage by their type. Can be set as Local, URL or Binary [Default: Local]
-;				                    * Delay - delay between slides transitions. This value cannot be less than global refresh rate [Default: 3000 ms]
-;				                    * Autoplay - automatically change slides after {Delay} ms. This value must be True or False [Default: True]
-;				                    * PlayDirection - Direction of transitions. When this value is True the transition is from left to right and when it's False from right to left [Default: True]
-;				                    * ErrorFont - Font name for slides with no images [Default: Segoe UI]
-;				                    * ErrorFontSize - Font size of text for slides with no images [Default: 15]
-;				                    * ErrorBkColor - Background color for slides with no images in AARRGGBB format [Default: 0xFFD0CECE]
-;				                    * ErrorColor - Text color for slides with no images in AARRGGBB format [Default: 0xFF595959]
-;				                    * CornerRadius - Radius of each corner of the slides. Set this at value 1 for rectangular slides [Default: 10]
-;				                    * ShowSlides - Show slides indicators in the top part of the slideshow control [Default: True]
-;				                    * SlidesSpace - Space between slides indicators in pixels [Default: 10]
-;				                    * SlideHeight - Height of the slides indicators in pixels [Default: 3]
-;				                    * SlideColor - Color of the slides indicators in AARRGGBB format [Default: 0x80FFFFFF]
-;				                    * SlideActive - Color of the active slide indicator in AARRGGBB format [Default: 0xFFFFFFFF]
-;				                    * ShowButtons - Display control buttons. If {AutoPlay} is False then this setting is automatically set to True[Default: True]
-;				                    * ButtonsPosition - Sets position of control buttons. Can be set as left, center or right [Default: right]
-;				                    * ButtonsSize - Buttons size in pixels. Maximum available size is 60px [Default: 40]
-;				                    * ButtonsColor - Background color of the buttons in AARRGGBB format [Default: 0xD0000000]
-;				                    * ButtonsGlyphColor - Glyphs color of the buttons in AARRGGBB format [Default: 0xFFFFFFFF]
-;				                    * ButtonsLineWidth - Glyphs line with of the buttons [Default: 2]
-;				                    * ShowCaptions - Display captions for slides. If this is set as True then {Captions} must be an array with the same size as $avImage [Default: False]
-;				                    * Captions - An array of the same size as $avImage that contains captions for each slide.
-;				                    * CaptionsFont - Font name used for captions [Default: Segoe UI]
-;				                    * CaptionsFontSize - Font size used for captions [Default: 12]
-;				                    * CaptionsFontStyle - Font style used for captions. This can be a combination of these values: 0 - Normal, 1 - Bold, 2 - Italic, 4 - Underline, 8 - Strikethrough [Default: 0]
-;				                    * CaptionsTextColor - Text color used for captions [Default: 0xFFFFFFFF]
-;				                    * Transition - Enable or disable transitions between slides change slides. This value must be True or False [Default: True]
-;				                    * TransitionFrames - Number of frames between transitions [Default: 40]
+; Name: 		    _GUICtrlSlideshow_Create
+; Description: 		Creates a slideshow control.
+; Syntax: 		    _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage [, $mOptions = Null])
+; Parameters: 		$hGUI - The handle of the parent window.
+;			        $iX - Position of the left side of the control.
+;			        $iY - Position of the top side of the control.
+;			        $iW - The width of the control.
+;			        $iH - The height of the control.
+;			        $avImage - An array that contains the images for the slideshow. Each element of this array contains a slide image. This can be an array of local file paths, URLs
+;				               or raw binary data but can't be mixed data. If the array contains URLs or raw binary data then ImageType must to be set as option.
+;			        $mOptions - [Optional] - A map with all customisable properties (each property it's a key).
+;				        Available properties:
+;				            * ImageType - load images from $avImage by their type. Can be set as Local, URL or Binary [Default: Local]
+;				            * Delay - delay between slides transitions. This value cannot be less than global refresh rate [Default: 3000 ms]
+;				            * Autoplay - automatically change slides after {Delay} ms. This value must be True or False [Default: True]
+;				            * PlayDirection - Direction of transitions. When this value is True the transition is from left to right and when it's False from right to left [Default: True]
+;				            * ErrorFont - Font name for slides with no images [Default: Segoe UI]
+;				            * ErrorFontSize - Font size of text for slides with no images [Default: 15]
+;				            * ErrorBkColor - Background color for slides with no images in AARRGGBB format [Default: 0xFFD0CECE]
+;				            * ErrorColor - Text color for slides with no images in AARRGGBB format [Default: 0xFF595959]
+;				            * CornerRadius - Radius of each corner of the slides. Set this at value 1 for rectangular slides [Default: 10]
+;				            * ShowSlides - Show slides indicators in the top part of the slideshow control [Default: True]
+;				            * SlidesSpace - Space between slides indicators in pixels [Default: 10]
+;				            * SlideHeight - Height of the slides indicators in pixels [Default: 3]
+;				            * SlideColor - Color of the slides indicators in AARRGGBB format [Default: 0x80FFFFFF]
+;				            * SlideActive - Color of the active slide indicator in AARRGGBB format [Default: 0xFFFFFFFF]
+;				            * ShowButtons - Display control buttons. If {AutoPlay} is False then this setting is automatically set to True[Default: True]
+;				            * ButtonsPosition - Sets position of control buttons. Can be set as left, center or right [Default: right]
+;				            * ButtonsSize - Buttons size in pixels. Maximum available size is 60px [Default: 40]
+;				            * ButtonsColor - Background color of the buttons in AARRGGBB format [Default: 0xD0000000]
+;				            * ButtonsGlyphColor - Glyphs color of the buttons in AARRGGBB format [Default: 0xFFFFFFFF]
+;				            * ButtonsLineWidth - Glyphs line with of the buttons [Default: 2]
+;				            * ShowCaptions - Display captions for slides. If this is set as True then {Captions} must be an array with the same size as $avImage [Default: False]
+;				            * Captions - An array of the same size as $avImage that contains captions for each slide.
+;				            * CaptionsFont - Font name used for captions [Default: Segoe UI]
+;				            * CaptionsFontSize - Font size used for captions [Default: 12]
+;				            * CaptionsFontStyle - Font style used for captions. This can be a combination of these values: 0 - Normal, 1 - Bold, 2 - Italic, 4 - Underline, 8 - Strikethrough [Default: 0]
+;				            * CaptionsTextColor - Text color used for captions [Default: 0xFFFFFFFF]
+;				            * Transition - Enable or disable transitions between slides change slides. This value must be True or False [Default: True]
+;				            * TransitionFrames - Number of frames between transitions [Default: 40]
 ; Return value: 	Success - Returns a map with all properties and settings.
 ;                   Failure - Returns Null.
-;				                @error = 1 - $avImage is not an array
-;				                @error = 2 - $avImage is an empty array
-;				                @error = 3 - $mOptions is not a map
-;				                @error = 4 - Maximum limit of controls has been reached
-;				                @error = 5 - Captions are enabled but no captions has been provided
-;				                @error = 6 - Mismatch between slides and captions
-; Author: 		    Andreik
-; Remarks: 		    When a slideshow control is not needed anymore, use _GUICtrlSlideshow_Delete() to release the resources.
+;				        @error = 1 - $avImage is not an array
+;				        @error = 2 - $avImage is an empty array
+;				        @error = 3 - $mOptions is not a map
+;				        @error = 4 - Maximum limit of controls has been reached
+;				        @error = 5 - Captions are enabled but no captions has been provided
+;				        @error = 6 - Mismatch between slides and captions
+; Author:		    Andreik
+; Remarks:		    When a slideshow control is not needed anymore, use _GUICtrlSlideshow_Delete() to release the resources.
 ; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOptions = Null)
 	If Not IsArray($avImage) Then Return SetError(1, 0, Null)
