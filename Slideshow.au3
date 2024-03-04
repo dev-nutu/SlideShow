@@ -95,7 +95,7 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 
 	Local $iImageType = (MapExists($mOptions, 'ImageType') ? $mOptions['ImageType'] : 'Local')
 	Local $iDelay = (MapExists($mOptions, 'Delay') ? $mOptions['Delay'] : 3000)
-    	Local $fTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : False)
+    	Local $fTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : True)
     	Local $iTransitionFrames = (MapExists($mOptions, 'TransitionFrames') ? $mOptions['TransitionFrames'] : 40)
 	Local $fAutoPlay = (MapExists($mOptions, 'Autoplay') ? $mOptions['Autoplay'] : True)
 	Local $fPlayDirection = (MapExists($mOptions, 'PlayDirection') ? $mOptions['PlayDirection'] : True)
