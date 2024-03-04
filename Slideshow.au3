@@ -1,91 +1,91 @@
 #include-once
 #include <GDIPlus.au3>
 
-; ==================================================================================================================================================================================================================
-; Title: Slideshow UDF
-; AutoIt Version : 3.3.16.1
-; Description: Slideshow control.
-; Author: Andreik
-; Dependencies: GDI+
-; Call _GDIPlus_Startup() before using any function from this UDF and _GDIPlus_Shutdown() after you properly deleted all controls created with this UDF
-; and there is no further need of any function from this UDF.
-; URL: https://www.autoitscript.com/forum/topic/211445-slideshow-udf/
-; Special thanks to UEZ (https://www.autoitscript.com/forum/profile/29844-uez/) for transition idea and sample code.
-; ==================================================================================================================================================================================================================
+; ===============================================================================================================================================================
+;   Title: Slideshow UDF
+;   AutoIt Version : 3.3.16.1
+;   Description: Slideshow control.
+;   Author: Andreik
+;   Dependencies: GDI+
+;   Call _GDIPlus_Startup() before using any function from this UDF and _GDIPlus_Shutdown() after you properly deleted all controls created with this UDF
+;   and there is no further need of any function from this UDF.
+;   URL: https://www.autoitscript.com/forum/topic/211445-slideshow-udf/
+;   Special thanks to UEZ (https://www.autoitscript.com/forum/profile/29844-uez/) for slides transition idea and sample code.
+; ===============================================================================================================================================================
 
-; #CURRENT# ========================================================================================================================================================================================================
-; _GUICtrlSlideshow_Create
-; _GUICtrlSlideshow_Delete
-; _GUICtrlSlideshow_ShowSlide
-; _GUICtrlSlideshow_ButtonEvent
-; ==================================================================================================================================================================================================================
+; #CURRENT# =====================================================================================================================================================
+;   _GUICtrlSlideshow_Create
+;   _GUICtrlSlideshow_Delete
+;    _GUICtrlSlideshow_ShowSlide
+;   _GUICtrlSlideshow_ButtonEvent
+; ===============================================================================================================================================================
 
-; #CONSTANTS# ======================================================================================================================================================================================================
+; #CONSTANTS# ===================================================================================================================================================
 Global Enum $SLIDESHOW_PREV_BTN, $SLIDESHOW_NEXT_BTN
 Global Enum $BTN_EVENT_PREV, $BTN_EVENT_NEXT
-; ==================================================================================================================================================================================================================
+; ===============================================================================================================================================================
 
-; #GLOBAL SETTINGS# ================================================================================================================================================================================================
+; #GLOBAL SETTINGS# =============================================================================================================================================
 Global $__mSlideshows[]
-$__mSlideshows['Count'] = 0		; For internal use - DO NOT CHANGE!!!
-$__mSlideshows['Refresh'] = 1000	; Minimum refresh rate
-$__mSlideshows['EventsRate'] = 250	; Minimum interval between mouse events
-$__mSlideshows['Max'] = 3		; Maximum numbers of controls. You can increase this but the performance will decrease
-					; if there are too many slideshows
-; ==================================================================================================================================================================================================================
+$__mSlideshows['Count'] = 0         ; For internal use - DO NOT CHANGE!!!
+$__mSlideshows['Refresh'] = 1000    ; Minimum refresh rate
+$__mSlideshows['EventsRate'] = 250  ; Minimum interval between mouse events
+$__mSlideshows['Max'] = 3           ; Maximum numbers of controls. You can increase this but the performance will decrease
+                                    ; if there are too many slideshows
+; ===============================================================================================================================================================
 
-; #FUNCTION# =======================================================================================================================================================================================================
-; Name: 		_GUICtrlSlideshow_Create
-; Description: 		Creates a slideshow control.
-; Syntax: 		_GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage [, $mOptions = Null])
-; Parameters: 		$hGUI - The handle of the parent window.
-;			$iX - Position of the left side of the control.
-;			$iY - Position of the top side of the control.
-;			$iW - The width of the control.
-;			$iH - The height of the control.
-;			$avImage - An array that contains the images for the slideshow. Each element of this array contains a slide image. This can be an array of local file paths, URLs
-;				 or raw binary data but can't be mixed data. If the array contains URLs or raw binary data then ImageType must to be set as option.
-;			$mOptions - [Optional] - A map with all customisable properties (each property it's a key).
-;				Available properties:
-;				* ImageType - load images from $avImage by their type. Can be set as Local, URL or Binary [Default: Local]
-;				* Delay - delay between slides transitions. This value cannot be less than global refresh rate [Default: 3000 ms]
-;				* Autoplay - automatically change slides after {Delay} ms. This value must be True or False [Default: True]
-;				* PlayDirection - Direction of transitions. When this value is True the transition is from left to right and when it's False from right to left [Default: True]
-;				* ErrorFont - Font name for slides with no images [Default: Segoe UI]
-;				* ErrorFontSize - Font size of text for slides with no images [Default: 15]
-;				* ErrorBkColor - Background color for slides with no images in AARRGGBB format [Default: 0xFFD0CECE]
-;				* ErrorColor - Text color for slides with no images in AARRGGBB format [Default: 0xFF595959]
-;				* CornerRadius - Radius of each corner of the slides. Set this at value 1 for rectangular slides [Default: 10]
-;				* ShowSlides - Show slides indicators in the top part of the slideshow control [Default: True]
-;				* SlidesSpace - Space between slides indicators in pixels [Default: 10]
-;				* SlideHeight - Height of the slides indicators in pixels [Default: 3]
-;				* SlideColor - Color of the slides indicators in AARRGGBB format [Default: 0x80FFFFFF]
-;				* SlideActive - Color of the active slide indicator in AARRGGBB format [Default: 0xFFFFFFFF]
-;				* ShowButtons - Display control buttons. If {AutoPlay} is False then this setting is automatically set to True[Default: True]
-;				* ButtonsPosition - Sets position of control buttons. Can be set as left, center or right [Default: right]
-;				* ButtonsSize - Buttons size in pixels. Maximum available size is 60px [Default: 40]
-;				* ButtonsColor - Background color of the buttons in AARRGGBB format [Default: 0xD0000000]
-;				* ButtonsGlyphColor - Glyphs color of the buttons in AARRGGBB format [Default: 0xFFFFFFFF]
-;				* ButtonsLineWidth - Glyphs line with of the buttons [Default: 2]
-;				* ShowCaptions - Display captions for slides. If this is set as True then {Captions} must be an array with the same size as $avImage [Default: False]
-;				* Captions - An array of the same size as $avImage that contains captions for each slide.
-;				* CaptionsFont - Font name used for captions [Default: Segoe UI]
-;				* CaptionsFontSize - Font size used for captions [Default: 12]
-;				* CaptionsFontStyle - Font style used for captions. This can be a combination of these values: 0 - Normal, 1 - Bold, 2 - Italic, 4 - Underline, 8 - Strikethrough [Default: 0]
-;				* CaptionsTextColor - Text color used for captions [Default: 0xFFFFFFFF]
-;               		* Transition - Enable or disable transitions between slides change slides. This value must be True or False [Default: True]
-;               		* TransitionFrames - Number of frames between transitions [Default: 40]
+; #FUNCTION# ====================================================================================================================================================
+; Name: 		        _GUICtrlSlideshow_Create
+; Description: 		    Creates a slideshow control.
+; Syntax: 		        _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage [, $mOptions = Null])
+; Parameters: 		    $hGUI - The handle of the parent window.
+;			                $iX - Position of the left side of the control.
+;			                $iY - Position of the top side of the control.
+;			                $iW - The width of the control.
+;			                $iH - The height of the control.
+;			                $avImage - An array that contains the images for the slideshow. Each element of this array contains a slide image. This can be an array of local file paths, URLs
+;				                            or raw binary data but can't be mixed data. If the array contains URLs or raw binary data then ImageType must to be set as option.
+;			                $mOptions - [Optional] - A map with all customisable properties (each property it's a key).
+;				                Available properties:
+;				                    * ImageType - load images from $avImage by their type. Can be set as Local, URL or Binary [Default: Local]
+;				                    * Delay - delay between slides transitions. This value cannot be less than global refresh rate [Default: 3000 ms]
+;				                    * Autoplay - automatically change slides after {Delay} ms. This value must be True or False [Default: True]
+;				                    * PlayDirection - Direction of transitions. When this value is True the transition is from left to right and when it's False from right to left [Default: True]
+;				                    * ErrorFont - Font name for slides with no images [Default: Segoe UI]
+;				                    * ErrorFontSize - Font size of text for slides with no images [Default: 15]
+;				                    * ErrorBkColor - Background color for slides with no images in AARRGGBB format [Default: 0xFFD0CECE]
+;				                    * ErrorColor - Text color for slides with no images in AARRGGBB format [Default: 0xFF595959]
+;				                    * CornerRadius - Radius of each corner of the slides. Set this at value 1 for rectangular slides [Default: 10]
+;				                    * ShowSlides - Show slides indicators in the top part of the slideshow control [Default: True]
+;				                    * SlidesSpace - Space between slides indicators in pixels [Default: 10]
+;				                    * SlideHeight - Height of the slides indicators in pixels [Default: 3]
+;				                    * SlideColor - Color of the slides indicators in AARRGGBB format [Default: 0x80FFFFFF]
+;				                    * SlideActive - Color of the active slide indicator in AARRGGBB format [Default: 0xFFFFFFFF]
+;				                    * ShowButtons - Display control buttons. If {AutoPlay} is False then this setting is automatically set to True[Default: True]
+;				                    * ButtonsPosition - Sets position of control buttons. Can be set as left, center or right [Default: right]
+;				                    * ButtonsSize - Buttons size in pixels. Maximum available size is 60px [Default: 40]
+;				                    * ButtonsColor - Background color of the buttons in AARRGGBB format [Default: 0xD0000000]
+;				                    * ButtonsGlyphColor - Glyphs color of the buttons in AARRGGBB format [Default: 0xFFFFFFFF]
+;				                    * ButtonsLineWidth - Glyphs line with of the buttons [Default: 2]
+;				                    * ShowCaptions - Display captions for slides. If this is set as True then {Captions} must be an array with the same size as $avImage [Default: False]
+;				                    * Captions - An array of the same size as $avImage that contains captions for each slide.
+;				                    * CaptionsFont - Font name used for captions [Default: Segoe UI]
+;				                    * CaptionsFontSize - Font size used for captions [Default: 12]
+;				                    * CaptionsFontStyle - Font style used for captions. This can be a combination of these values: 0 - Normal, 1 - Bold, 2 - Italic, 4 - Underline, 8 - Strikethrough [Default: 0]
+;				                    * CaptionsTextColor - Text color used for captions [Default: 0xFFFFFFFF]
+;				                    * Transition - Enable or disable transitions between slides change slides. This value must be True or False [Default: True]
+;				                    * TransitionFrames - Number of frames between transitions [Default: 40]
 ; Return value: 	Success - Returns a map with all properties and settings.
-;                  	Failure - Returns Null.
-;				@error = 1 - $avImage is not an array
-;				@error = 2 - $avImage is an empty array
-;				@error = 3 - $mOptions is not a map
-;				@error = 4 - Maximum limit of controls has been reached
-;				@error = 5 - Captions are enabled but no captions has been provided
-;				@error = 6 - Mismatch between slides and captions
-; Author: 		Andreik
-; Remarks: 		When a slideshow control is not needed anymore, use _GUICtrlSlideshow_Delete() to release the resources.
-; ==================================================================================================================================================================================================================
+;                   Failure - Returns Null.
+;				                @error = 1 - $avImage is not an array
+;				                @error = 2 - $avImage is an empty array
+;				                @error = 3 - $mOptions is not a map
+;				                @error = 4 - Maximum limit of controls has been reached
+;				                @error = 5 - Captions are enabled but no captions has been provided
+;				                @error = 6 - Mismatch between slides and captions
+; Author: 		    Andreik
+; Remarks: 		    When a slideshow control is not needed anymore, use _GUICtrlSlideshow_Delete() to release the resources.
+; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOptions = Null)
 	If Not IsArray($avImage) Then Return SetError(1, 0, Null)
 	Local $iCount = UBound($avImage)
@@ -95,8 +95,8 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 
 	Local $iImageType = (MapExists($mOptions, 'ImageType') ? $mOptions['ImageType'] : 'Local')
 	Local $iDelay = (MapExists($mOptions, 'Delay') ? $mOptions['Delay'] : 3000)
-    	Local $fTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : True)
-    	Local $iTransitionFrames = (MapExists($mOptions, 'TransitionFrames') ? $mOptions['TransitionFrames'] : 40)
+    Local $fTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : True)
+    Local $iTransitionFrames = (MapExists($mOptions, 'TransitionFrames') ? $mOptions['TransitionFrames'] : 40)
 	Local $fAutoPlay = (MapExists($mOptions, 'Autoplay') ? $mOptions['Autoplay'] : True)
 	Local $fPlayDirection = (MapExists($mOptions, 'PlayDirection') ? $mOptions['PlayDirection'] : True)
 	Local $sErrorFont = (MapExists($mOptions, 'ErrorFont') ? $mOptions['ErrorFont'] : 'Segoe UI')
@@ -140,14 +140,14 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 	$mSlideshow['GUI'] = $hGUI
 	$mSlideshow['Images'] = $avImage
 	$mSlideshow['Index'] = 0
-    	$mSlideshow['PrevIndex'] = 0
+    $mSlideshow['PrevIndex'] = 0
 	$mSlideshow['Count'] = $iCount
 	$mSlideshow['Width'] = $iWidth
 	$mSlideshow['Height'] = $iHeight
 	$mSlideshow['Radius'] = $iRadius
 	$mSlideshow['Delay'] = ($iDelay < $__mSlideshows['Refresh'] ? $__mSlideshows['Refresh'] : $iDelay)
-    	$mSlideshow['Transition'] = ($fTransition ? True : False)
-    	$mSlideshow['TransitionFrames'] = $iTransitionFrames
+    $mSlideshow['Transition'] = ($fTransition ? True : False)
+    $mSlideshow['TransitionFrames'] = $iTransitionFrames
 	$mSlideshow['NoImage'] = __NoImage($iWidth, $iHeight, $iErrorBkColor, $iErrorColor, $sErrorFont, $iErrorFontSize)
 	$mSlideshow['Ctrl'] = GUICtrlCreatePic('', $iX, $iY, $iWidth, $iHeight, ($iRadius > 0 ? Default : 0x1000))	; $SS_SUNKEN
 	$mSlideshow['ShowSlides'] = $fShowSlides
@@ -182,16 +182,16 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 	Return $mSlideshow
 EndFunc
 
-; #FUNCTION# =======================================================================================================================================================================================================
-; Name: 		_GUICtrlSlideshow_Delete
+; #FUNCTION# ====================================================================================================================================================
+; Name: 		    _GUICtrlSlideshow_Delete
 ; Description: 		Deletes a slideshow control.
-; Syntax: 		_GUICtrlSlideshow_Delete($mSlideshow)
+; Syntax: 		    _GUICtrlSlideshow_Delete($mSlideshow)
 ; Parameters: 		$mSlideshow - A map variable that represents a slideshow control.
 ; Return value: 	Success - None
 ;                  	Failure - Returns Null.
-;				@error = 1 - $mSlideshow is not a map
-; Author: 		Andreik
-; ==================================================================================================================================================================================================================
+;				        @error = 1 - $mSlideshow is not a map
+; Author:            Andreik
+; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_Delete(ByRef $mSlideshow)
 	Local $nIndex, $mNew
 	If Not IsMap($mSlideshow) Then Return SetError(1, 0, Null)
@@ -211,29 +211,29 @@ Func _GUICtrlSlideshow_Delete(ByRef $mSlideshow)
 	If $__mSlideshows['Count'] = 0 Then AdlibUnRegister('__Slideshow_Proc')
 EndFunc
 
-; #FUNCTION# =======================================================================================================================================================================================================
-; Name: 		_GUICtrlSlideshow_ShowSlide
+; #FUNCTION# ====================================================================================================================================================
+; Name: 		    _GUICtrlSlideshow_ShowSlide
 ; Description: 		Shows previous or next slide based on an event.
-; Syntax: 		_GUICtrlSlideshow_ShowSlide($mSlideshow, $iEvent)
+; Syntax: 		    _GUICtrlSlideshow_ShowSlide($mSlideshow, $iEvent)
 ; Parameters: 		$mSlideshow - A map variable that represents a slideshow control.
-;			$iEvent - An event. Can be one of the following $BTN_EVENT_PREV or $BTN_EVENT_NEXT
+;			        $iEvent - An event. Can be one of the following $BTN_EVENT_PREV or $BTN_EVENT_NEXT
 ; Return value: 	None
-; Author: 		Andreik
-; ==================================================================================================================================================================================================================
+; Author: 		    Andreik
+; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_ShowSlide($mSlideshow, $iEvent)
 	If $iEvent = $BTN_EVENT_PREV Or $iEvent = $BTN_EVENT_NEXT Then __Slide($mSlideshow, $iEvent)
 EndFunc
 
-; #FUNCTION# =======================================================================================================================================================================================================
-; Name: 		_GUICtrlSlideshow_ButtonEvent
+; #FUNCTION# ====================================================================================================================================================
+; Name: 		    _GUICtrlSlideshow_ButtonEvent
 ; Description: 		Check if a certain button from a slideshow has been clicked.
-; Syntax: 		_GUICtrlSlideshow_ButtonEvent($mSlideshow, $iSlideshowBtn)
+; Syntax: 		    _GUICtrlSlideshow_ButtonEvent($mSlideshow, $iSlideshowBtn)
 ; Parameters: 		$mSlideshow - A map variable that represents a slideshow control.
-;			$iSlideshowBtn - A constant that represents the expected event. This can be set as $SLIDESHOW_PREV_BTN or $SLIDESHOW_NEXT_BTN
+;			        $iSlideshowBtn - A constant that represents the expected event. This can be set as $SLIDESHOW_PREV_BTN or $SLIDESHOW_NEXT_BTN
 ; Return value: 	Success - True
 ;                  	Failure - False
-; Author: 		Andreik
-; ==================================================================================================================================================================================================================
+; Author: 		    Andreik
+; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_ButtonEvent(ByRef $mSlideshow, $iSlideshowBtn)
 	If TimerDiff($mSlideshow['LastEvent']) < $__mSlideshows['EventsRate'] Then Return False
 	If WinActive($mSlideshow['GUI']) Then
@@ -262,9 +262,9 @@ Func _GUICtrlSlideshow_ButtonEvent(ByRef $mSlideshow, $iSlideshowBtn)
 	Return False
 EndFunc
 
-; #INTERNAL_USE_ONLY# ; ============================================================================================================================================================================================
-; The following functions are for internal use only and should never be directly called.
-; ==================================================================================================================================================================================================================
+; #INTERNAL_USE_ONLY# ; =========================================================================================================================================
+;   The following functions are for internal use only and should never be directly called.
+; ===============================================================================================================================================================
 
 Func __Slideshow_Proc()
 	__Slide()
@@ -278,7 +278,7 @@ Func __Slide($mSlideshow = Null, $iEvent = Null)
 	Local $iStop = ($mSlideshow = Null ? $nSlideshows : $mSlideshow['Ref'])
 	Local $mCurrent, $avImage, $hBitmap, $hClone, $hGraphics, $iCount, $hDisplayImage, $hPath, $iWidth, $iHeight, $iRadius
 	Local $iPrevButtonPos, $iNextButtonPos, $hPen, $hFontFamily, $hFont, $hFormat, $tRect, $asCaptions, $nSlideStart
-    	Local $hAttributes, $hTransition, $hTransitionGraphics, $tMatrix
+    Local $hAttributes, $hTransition, $hTransitionGraphics, $tMatrix
 	Local $hBrush = _GDIPlus_BrushCreateSolid()
 	Local $hPen = _GDIPlus_PenCreate()
 	_GDIPlus_PenSetLineCap($hPen, 2, 2, 2)
@@ -367,30 +367,30 @@ Func __Slide($mSlideshow = Null, $iEvent = Null)
 			_GDIPlus_GraphicsDrawLine($hGraphics, $iNextButtonPos + $mCurrent['ButtonsSize'] - 10, Int($iHeight - 20 - $mCurrent['ButtonsSize'] / 2), $iNextButtonPos + 15, $iHeight - 32, $hPen)
 		EndIf
 		If $mCurrent['Transition'] Then
-            		For $iOpacity = -1 To 0 Step (1 / $mCurrent['TransitionFrames'])
-                		$hAttributes = _GDIPlus_ImageAttributesCreate()
-                		$hTransition = _GDIPlus_BitmapCreateFromScan0($iWidth, $iHeight)
-                		$hTransitionGraphics = _GDIPlus_ImageGetGraphicsContext($hTransition)
-                		_GDIPlus_GraphicsSetPixelOffsetMode($hTransitionGraphics, 4)
-                		If $iRadius > 0 Then _GDIPlus_GraphicsSetClipPath($hTransitionGraphics, $hPath)
-                		$tMatrix = _GDIPlus_ColorMatrixCreateTranslate(0, 0, 0, $iOpacity)
-                		_GDIPlus_ImageAttributesSetColorMatrix($hAttributes, 0, True, DllStructGetPtr($tMatrix))
-                		_GDIPlus_GraphicsDrawImageRect($hTransitionGraphics, $avImage[$mCurrent['PrevIndex']], 0, 0, $iWidth, $iHeight)
-                		_GDIPlus_GraphicsDrawImageRectRect($hTransitionGraphics, $hDisplayImage, 0, 0, $iWidth, $iHeight, 0, 0, $iWidth, $iHeight, $hAttributes)
-                		__BitmapToCtrl($hTransition, $mCurrent['Ctrl'])
-                		_GDIPlus_GraphicsDispose($hTransitionGraphics)
-                		_GDIPlus_BitmapDispose($hTransition)
-                		_GDIPlus_ImageAttributesDispose($hAttributes)
-            		Next
-        	EndIf
-        	__BitmapToCtrl($hDisplayImage, $mCurrent['Ctrl'])
-        	If $iRadius > 0 Then _GDIPlus_PathDispose($hPath)
+            For $iOpacity = -1 To 0 Step (1 / $mCurrent['TransitionFrames'])
+                $hAttributes = _GDIPlus_ImageAttributesCreate()
+                $hTransition = _GDIPlus_BitmapCreateFromScan0($iWidth, $iHeight)
+                $hTransitionGraphics = _GDIPlus_ImageGetGraphicsContext($hTransition)
+                _GDIPlus_GraphicsSetPixelOffsetMode($hTransitionGraphics, 4)
+                If $iRadius > 0 Then _GDIPlus_GraphicsSetClipPath($hTransitionGraphics, $hPath)
+                $tMatrix = _GDIPlus_ColorMatrixCreateTranslate(0, 0, 0, $iOpacity)
+                _GDIPlus_ImageAttributesSetColorMatrix($hAttributes, 0, True, DllStructGetPtr($tMatrix))
+                _GDIPlus_GraphicsDrawImageRect($hTransitionGraphics, $avImage[$mCurrent['PrevIndex']], 0, 0, $iWidth, $iHeight)
+                _GDIPlus_GraphicsDrawImageRectRect($hTransitionGraphics, $hDisplayImage, 0, 0, $iWidth, $iHeight, 0, 0, $iWidth, $iHeight, $hAttributes)
+                __BitmapToCtrl($hTransition, $mCurrent['Ctrl'])
+                _GDIPlus_GraphicsDispose($hTransitionGraphics)
+                _GDIPlus_BitmapDispose($hTransition)
+                _GDIPlus_ImageAttributesDispose($hAttributes)
+            Next
+        EndIf
+        __BitmapToCtrl($hDisplayImage, $mCurrent['Ctrl'])
+        If $iRadius > 0 Then _GDIPlus_PathDispose($hPath)
 		_GDIPlus_GraphicsDispose($hGraphics)
 		_GDIPlus_BitmapDispose($hClone)
 		_GDIPlus_BitmapDispose($hDisplayImage)
 		$mCurrent['FirstUpdate'] = True
 		$mCurrent['LastUpdate'] = TimerInit()
-        	$mCurrent['PrevIndex'] = $mCurrent['Index']
+        $mCurrent['PrevIndex'] = $mCurrent['Index']
 		$__mSlideshows[$nIndex] = $mCurrent
 	Next
 	_GDIPlus_PenDispose($hPen)
