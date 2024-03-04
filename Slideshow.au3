@@ -190,7 +190,7 @@ EndFunc
 ; Return value: 	Success - None
 ;                  	Failure - Returns Null.
 ;				        @error = 1 - $mSlideshow is not a map
-; Author:            Andreik
+; Author:           Andreik
 ; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_Delete(ByRef $mSlideshow)
 	Local $nIndex, $mNew
