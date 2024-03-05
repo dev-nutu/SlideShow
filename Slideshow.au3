@@ -224,6 +224,7 @@ EndFunc
 Func _GUICtrlSlideshow_ShowSlide($mSlideshow, $iEvent)
   If Not IsMap($mSlideshow) Then Return False
   If $iEvent = $BTN_EVENT_PREV Or $iEvent = $BTN_EVENT_NEXT Then __Slide($mSlideshow, $iEvent)
+  Return True
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================================================
