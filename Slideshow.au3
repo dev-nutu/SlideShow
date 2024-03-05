@@ -217,10 +217,12 @@ EndFunc
 ; Syntax:         _GUICtrlSlideshow_ShowSlide($mSlideshow, $iEvent)
 ; Parameters:     $mSlideshow - A map variable that represents a slideshow control.
 ;                 $iEvent - An event. Can be one of the following $BTN_EVENT_PREV or $BTN_EVENT_NEXT
-; Return value:   None
+; Return value:   Success - True
+;                 Failure - False
 ; Author:         Andreik
 ; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_ShowSlide($mSlideshow, $iEvent)
+  If Not IsMap($mSlideshow) Then Return False
   If $iEvent = $BTN_EVENT_PREV Or $iEvent = $BTN_EVENT_NEXT Then __Slide($mSlideshow, $iEvent)
 EndFunc
 
@@ -235,6 +237,7 @@ EndFunc
 ; Author:         Andreik
 ; ===============================================================================================================================================================
 Func _GUICtrlSlideshow_ButtonEvent(ByRef $mSlideshow, $iSlideshowBtn)
+  If Not IsMap($mSlideshow) Then Return False
   If TimerDiff($mSlideshow['LastEvent']) < $__mSlideshows['EventsRate'] Then Return False
   If WinActive($mSlideshow['GUI']) Then
     Local $aInfo = GUIGetCursorInfo($mSlideshow['GUI'])
