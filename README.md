@@ -10,6 +10,8 @@ Available functions in this UDF:
 * _GUICtrlSlideshow_ShowSlide
 * _GUICtrlSlideshow_ButtonEvent
 
+# No preloaded images
+If you don't want the images to be preloaded, just use **SlideshowEx.au3** and the images will be dinamically created. Using this extended library ***ImageType*** option is not available anymore but ***$avImage*** parameter can be a mixed array with local file paths, URLs or raw binary data.
 
 > [!NOTE]
 > Each function from SlideShow.au3 have a comment header where parameters and return codes are described.
