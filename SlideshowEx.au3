@@ -142,7 +142,6 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
     $mSlideshow['ErrorColor'] = $iErrorColor
     $mSlideshow['ErrorFontName'] = $sErrorFont
     $mSlideshow['ErrorFontSize'] = $iErrorFontSize
-
     $mSlideshow['Ctrl'] = GUICtrlCreatePic('', $iX, $iY, $iWidth, $iHeight, ($iRadius > 0 ? Default : 0x1000))  ; $SS_SUNKEN
     $mSlideshow['ShowSlides'] = $fShowSlides
     $mSlideshow['SlidesSpace'] = $iSlidesSpace
