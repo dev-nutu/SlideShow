@@ -9,11 +9,18 @@ Global $avImage[4] = [ _
 
 Global $asCaptions[4] = ['Pico do Fogo', 'Praia da Chave', 'Buracona - Blue Eye Cave', 'Deserto de Viana']
 
+Global $mKeys[]         ; Check _IsPressed() in help file for more virtual key codes
+$mKeys['Prev'] = '25'   ; Left arrow button
+$mKeys['Next'] = '27'   ; Right arrow button
+
 Global $mOptions[]
 $mOptions['ImageType'] = 'URL'
-$mOptions['Captions'] = $asCaptions
+$mOptions['ShowSlides'] = True
 $mOptions['ShowCaptions'] = True
-$mOptions['CornerRadius'] = 0
+$mOptions['Captions'] = $asCaptions
+$mOptions['EnableKeys'] = True
+$mOptions['Keys'] = $mKeys
+$mOptions['Transition'] = True
 
 Global $sTitle = 'Cape Verde'
 Global $sText = 'Cape Verde or Cabo Verde, officially the Republic of Cabo Verde, is an archipelago and island country of West Africa in the central Atlantic Ocean, ' & _
@@ -43,6 +50,7 @@ GUICtrlSetColor($cCopyright, 0x800000)
 GUISetState(@SW_SHOW, $hGUI)
 
 While True
+    _GUICtrlSlideshow_KeyEvent($mSlideshow)
     If _GUICtrlSlideshow_ButtonEvent($mSlideshow, $SLIDESHOW_PREV_BTN) Then _GUICtrlSlideshow_ShowSlide($mSlideshow, $BTN_EVENT_PREV)
     If _GUICtrlSlideshow_ButtonEvent($mSlideshow, $SLIDESHOW_NEXT_BTN) Then _GUICtrlSlideshow_ShowSlide($mSlideshow, $BTN_EVENT_NEXT)
     Switch GUIGetMsg()
