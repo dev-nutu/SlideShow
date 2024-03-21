@@ -18,6 +18,7 @@
 ;   _GUICtrlSlideshow_Delete
 ;   _GUICtrlSlideshow_ShowSlide
 ;   _GUICtrlSlideshow_ButtonEvent
+;   _GUICtrlSlideshow_KeyEvent
 ; ===============================================================================================================================================================
 
 ; #CONSTANTS# ===================================================================================================================================================
@@ -75,6 +76,9 @@ $__mSlideshows['Max'] = 3           ; Maximum numbers of controls. You can incre
 ;                    * CaptionsTextColor - Text color used for captions [Default: 0xFFFFFFFF]
 ;                    * Transition - Enable or disable transitions between slides change slides. This value must be True or False [Default: True]
 ;                    * TransitionFrames - Number of frames between transitions [Default: 40]
+;                    * EnableKeys - Enable keyboard support to change slides. This value must be True or False [Default: True]
+;                    * Keys - It's a map with two mandatory keys [Prev and Next] and their paired values are virtual-key code. This property must be set if EnableKeys is set to True.
+;                             For a list of available codes please check _IsPressed() documentation in help file.
 ; Return value:  Success - Returns a map with all properties and settings.
 ;                Failure - Returns Null.
 ;                    @error = 1 - $avImage is not an array
@@ -83,6 +87,10 @@ $__mSlideshows['Max'] = 3           ; Maximum numbers of controls. You can incre
 ;                    @error = 4 - Maximum limit of controls has been reached
 ;                    @error = 5 - Captions are enabled but no captions has been provided
 ;                    @error = 6 - Mismatch between slides and captions
+;                    @error = 7 - Keys are not a map or Prev/Next entries are not defined
+;                       @extended = 1 - Invalid keys map
+;                       @extended = 2 - Prev key it's not defined
+;                       @extended = 3 - Next key it's not defined
 ; Author:        Andreik
 ; Remarks:       When a slideshow control is not needed anymore, use _GUICtrlSlideshow_Delete() to release the resources.
 ; ===============================================================================================================================================================
@@ -121,10 +129,18 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
   Local $iCaptionsFontSize = (MapExists($mOptions, 'CaptionsFontSize') ? $mOptions['CaptionsFontSize'] : 12)
   Local $iCaptionsFontStyle = (MapExists($mOptions, 'CaptionsFontStyle') ? $mOptions['CaptionsFontStyle'] : 0)
   Local $iCaptionsTextColor = (MapExists($mOptions, 'CaptionsTextColor') ? $mOptions['CaptionsTextColor'] : 0xFFFFFFFF)
+  Local $fKeys = (MapExists($mOptions, 'EnableKeys') ? $mOptions['EnableKeys'] : False)
+  Local $mKeys = (MapExists($mOptions, 'Keys') ? $mOptions['Keys'] : Null)
 
   If $fCaptions Then
     If Not IsArray($asCaptions) Then Return SetError(5, 0, Null)
     If $iCount <> UBound($asCaptions) Then Return SetError(6, 0, Null)
+  EndIf
+
+  If $fKeys Then
+    If Not IsMap($mKeys) Then Return SetError(7, 1, Null)
+    If Not MapExists($mKeys, 'Prev') Then Return SetError(7, 2, Null)
+    If Not MapExists($mKeys, 'Next') Then Return SetError(7, 3, Null)
   EndIf
 
   Switch $iImageType
@@ -170,12 +186,15 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
   $mSlideshow['CaptionsTextColor'] = $iCaptionsTextColor
   $mSlideshow['Autoplay'] = $fAutoPlay
   $mSlideshow['PlayDirection'] = $fPlayDirection
+  $mSlideshow['EnableKeys'] = ($fKeys ? True : False)
+  $mSlideshow['Keys'] = $mKeys
+  $mSlideshow['User32'] = $fKeys ? DllOpen('user32.dll') : Null
   $mSlideshow['LastUpdate'] = TimerInit()
   $mSlideshow['LastEvent'] = TimerInit()
 
   $__mSlideshows['Count'] = $__mSlideshows['Count'] + 1
-  $__mSlideshows[$__mSlideshows['Count']] = $mSlideshow
   $mSlideshow['Ref'] = $__mSlideshows['Count']
+  $__mSlideshows[$__mSlideshows['Count']] = $mSlideshow
 
   __Slide($mSlideshow)
 
@@ -201,6 +220,7 @@ Func _GUICtrlSlideshow_Delete(ByRef $mSlideshow)
   Next
   _GDIPlus_BitmapDispose($mSlideshow['NoImage'])
   GUICtrlDelete($mSlideshow['Ctrl'])
+  If $mSlideshow['EnableKeys'] Then DllClose($mSlideshow['User32'])
   For $nIndex = $mSlideshow['Ref'] + 1 To $__mSlideshows['Count']
     $mNew = $__mSlideshows[$nIndex]
     $mNew['Ref'] = $nIndex - 1
@@ -264,6 +284,33 @@ Func _GUICtrlSlideshow_ButtonEvent(ByRef $mSlideshow, $iSlideshowBtn)
     EndIf
   EndIf
   Return False
+EndFunc
+
+; #FUNCTION# ====================================================================================================================================================
+; Name:           _GUICtrlSlideshow_KeyEvent
+; Description:    Check if a key is pressed.
+; Syntax:         _GUICtrlSlideshow_KeyEvent($mSlideshow)
+; Parameters:     $mSlideshow - A map variable that represents a slideshow control.
+; Return value:   Success - True
+;                 Failure - False
+; Author:         Andreik
+; ===============================================================================================================================================================
+Func _GUICtrlSlideshow_KeyEvent(ByRef $mSlideshow)
+    If Not IsMap($mSlideshow) Then Return False
+    If Not $mSlideshow['EnableKeys'] Then Return False
+    If Not WinActive($mSlideshow['GUI']) Then Return False
+    If TimerDiff($mSlideshow['LastEvent']) < $__mSlideshows['EventsRate'] Then Return False
+    Local $mKeys = $mSlideshow['Keys']
+    If __Pressed($mKeys['Prev'], $mSlideshow['User32']) Then
+        $mSlideshow['LastEvent'] = TimerInit()
+        __Slide($mSlideshow, $BTN_EVENT_PREV)
+        Return True
+    EndIf
+    If __Pressed($mKeys['Next'], $mSlideshow['User32']) Then
+        $mSlideshow['LastEvent'] = TimerInit()
+        __Slide($mSlideshow, $BTN_EVENT_NEXT)
+        Return True
+    EndIf
 EndFunc
 
 ; #INTERNAL_USE_ONLY# ; =========================================================================================================================================
@@ -487,4 +534,11 @@ Func __BitmapToCtrl($hBitmap, $cCtrl)
   Local $hHBITMAP = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hBitmap)
   _WinAPI_DeleteObject(GUICtrlSendMsg($cCtrl, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBITMAP))
   _WinAPI_DeleteObject($hHBITMAP)
+EndFunc
+
+Func __Pressed($sHexKey, $hDLL)
+    ; Nothing fancy here, it's just _IsPressed() but I hate to include a header for a single function
+	Local $aCall = DllCall($hDLL, 'short', 'GetAsyncKeyState', 'int', '0x' & $sHexKey)
+	If @error Then Return SetError(@error, @extended, False)
+	Return BitAND($aCall[0], 0x8000) <> 0
 EndFunc
