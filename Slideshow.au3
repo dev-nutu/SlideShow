@@ -103,41 +103,41 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
 
   Local $iImageType = (MapExists($mOptions, 'ImageType') ? $mOptions['ImageType'] : 'Local')
   Local $iDelay = (MapExists($mOptions, 'Delay') ? $mOptions['Delay'] : 3000)
-  Local $fTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : True)
+  Local $bTransition = (MapExists($mOptions, 'Transition') ? $mOptions['Transition'] : True)
   Local $iTransitionFrames = (MapExists($mOptions, 'TransitionFrames') ? $mOptions['TransitionFrames'] : 40)
-  Local $fAutoPlay = (MapExists($mOptions, 'Autoplay') ? $mOptions['Autoplay'] : True)
-  Local $fPlayDirection = (MapExists($mOptions, 'PlayDirection') ? $mOptions['PlayDirection'] : True)
+  Local $bAutoPlay = (MapExists($mOptions, 'Autoplay') ? $mOptions['Autoplay'] : True)
+  Local $bPlayDirection = (MapExists($mOptions, 'PlayDirection') ? $mOptions['PlayDirection'] : True)
   Local $sErrorFont = (MapExists($mOptions, 'ErrorFont') ? $mOptions['ErrorFont'] : 'Segoe UI')
   Local $iErrorFontSize = (MapExists($mOptions, 'ErrorFontSize') ? $mOptions['ErrorFontSize'] : 15)
   Local $iErrorBkColor = (MapExists($mOptions, 'ErrorBkColor') ? $mOptions['ErrorBkColor'] : 0xFFD0CECE)
   Local $iErrorColor = (MapExists($mOptions, 'ErrorColor') ? $mOptions['ErrorColor'] : 0xFF595959)
   Local $iRadius = (MapExists($mOptions, 'CornerRadius') ? $mOptions['CornerRadius'] : 10)
-  Local $fShowSlides = (MapExists($mOptions, 'ShowSlides') ? $mOptions['ShowSlides'] : True)
+  Local $bShowSlides = (MapExists($mOptions, 'ShowSlides') ? $mOptions['ShowSlides'] : True)
   Local $iSlidesSpace = (MapExists($mOptions, 'SlidesSpace') ? $mOptions['SlidesSpace'] : 10)
   Local $iSlideHeight = (MapExists($mOptions, 'SlideHeight') ? $mOptions['SlideHeight'] : 3)
   Local $iSlideColor = (MapExists($mOptions, 'SlideColor') ? $mOptions['SlideColor'] : 0x80FFFFFF)
   Local $iSlideActive = (MapExists($mOptions, 'SlideActive') ? $mOptions['SlideActive'] : 0xFFFFFFFF)
-  Local $fShowButtons = (MapExists($mOptions, 'ShowButtons') ? $mOptions['ShowButtons'] : True)
+  Local $bShowButtons = (MapExists($mOptions, 'ShowButtons') ? $mOptions['ShowButtons'] : True)
   Local $sButtonsPosition = (MapExists($mOptions, 'ButtonsPosition') ? $mOptions['ButtonsPosition'] : 'right')
   Local $iButtonsSize = (MapExists($mOptions, 'ButtonsSize') ? $mOptions['ButtonsSize'] : 40)
   Local $iButtonsColor = (MapExists($mOptions, 'ButtonsColor') ? $mOptions['ButtonsColor'] : 0xD0000000)
   Local $iButtonsGlyphColor = (MapExists($mOptions, 'ButtonsGlyphColor') ? $mOptions['ButtonsGlyphColor'] : 0xFFFFFFFF)
   Local $iButtonsLineWidth = (MapExists($mOptions, 'ButtonsLineWidth') ? $mOptions['ButtonsLineWidth'] : 2)
-  Local $fCaptions = (MapExists($mOptions, 'ShowCaptions') ? $mOptions['ShowCaptions'] : False)
+  Local $bCaptions = (MapExists($mOptions, 'ShowCaptions') ? $mOptions['ShowCaptions'] : False)
   Local $asCaptions = (MapExists($mOptions, 'Captions') ? $mOptions['Captions'] : Null)
   Local $sCaptionsFont = (MapExists($mOptions, 'CaptionsFont') ? $mOptions['CaptionsFont'] : 'Segoe UI')
   Local $iCaptionsFontSize = (MapExists($mOptions, 'CaptionsFontSize') ? $mOptions['CaptionsFontSize'] : 12)
   Local $iCaptionsFontStyle = (MapExists($mOptions, 'CaptionsFontStyle') ? $mOptions['CaptionsFontStyle'] : 0)
   Local $iCaptionsTextColor = (MapExists($mOptions, 'CaptionsTextColor') ? $mOptions['CaptionsTextColor'] : 0xFFFFFFFF)
-  Local $fKeys = (MapExists($mOptions, 'EnableKeys') ? $mOptions['EnableKeys'] : False)
+  Local $bKeys = (MapExists($mOptions, 'EnableKeys') ? $mOptions['EnableKeys'] : False)
   Local $mKeys = (MapExists($mOptions, 'Keys') ? $mOptions['Keys'] : Null)
 
-  If $fCaptions Then
+  If $bCaptions Then
     If Not IsArray($asCaptions) Then Return SetError(5, 0, Null)
     If $iCount <> UBound($asCaptions) Then Return SetError(6, 0, Null)
   EndIf
 
-  If $fKeys Then
+  If $bKeys Then
     If Not IsMap($mKeys) Then Return SetError(7, 1, Null)
     If Not MapExists($mKeys, 'Prev') Then Return SetError(7, 2, Null)
     If Not MapExists($mKeys, 'Next') Then Return SetError(7, 3, Null)
@@ -162,33 +162,33 @@ Func _GUICtrlSlideshow_Create($hGUI, $iX, $iY, $iWidth, $iHeight, $avImage, $mOp
   $mSlideshow['Height'] = $iHeight
   $mSlideshow['Radius'] = $iRadius
   $mSlideshow['Delay'] = ($iDelay < $__mSlideshows['Refresh'] ? $__mSlideshows['Refresh'] : $iDelay)
-  $mSlideshow['Transition'] = ($fTransition ? True : False)
+  $mSlideshow['Transition'] = ($bTransition ? True : False)
   $mSlideshow['TransitionFrames'] = $iTransitionFrames
   $mSlideshow['NoImage'] = __NoImage($iWidth, $iHeight, $iErrorBkColor, $iErrorColor, $sErrorFont, $iErrorFontSize)
   $mSlideshow['Ctrl'] = GUICtrlCreatePic('', $iX, $iY, $iWidth, $iHeight, ($iRadius > 0 ? Default : 0x1000))  ; $SS_SUNKEN
-  $mSlideshow['ShowSlides'] = $fShowSlides
+  $mSlideshow['ShowSlides'] = $bShowSlides
   $mSlideshow['SlidesSpace'] = $iSlidesSpace
   $mSlideshow['SlideWidth'] = Int(($iWidth - (($iCount + 1) * $mSlideshow['SlidesSpace'])) / $iCount)
   $mSlideshow['SlideHeight'] = $iSlideHeight
   $mSlideshow['SlideColor'] = $iSlideColor
   $mSlideshow['SlideActive'] = $iSlideActive
-  $mSlideshow['ShowButtons'] = ($fAutoPlay ? $fShowButtons : True)
+  $mSlideshow['ShowButtons'] = ($bAutoPlay ? ($bShowButtons ? True : False) : True)
   $mSlideshow['ButtonsPosition'] = $sButtonsPosition
   $mSlideshow['ButtonsSize'] = ($iButtonsSize > 60 ? 60 : $iButtonsSize)
   $mSlideshow['ButtonsColor'] = $iButtonsColor
   $mSlideshow['ButtonsGlyphColor'] = $iButtonsGlyphColor
   $mSlideshow['ButtonsLineWidth'] = $iButtonsLineWidth
-  $mSlideshow['ShowCaptions'] = $fCaptions
+  $mSlideshow['ShowCaptions'] = $bCaptions
   $mSlideshow['Captions'] = $asCaptions
   $mSlideshow['CaptionsFont'] = $sCaptionsFont
   $mSlideshow['CaptionsFontStyle'] = $iCaptionsFontStyle
   $mSlideshow['CaptionsFontSize'] = $iCaptionsFontSize
   $mSlideshow['CaptionsTextColor'] = $iCaptionsTextColor
-  $mSlideshow['Autoplay'] = $fAutoPlay
-  $mSlideshow['PlayDirection'] = $fPlayDirection
-  $mSlideshow['EnableKeys'] = ($fKeys ? True : False)
+  $mSlideshow['Autoplay'] = $bAutoPlay
+  $mSlideshow['PlayDirection'] = $bPlayDirection
+  $mSlideshow['EnableKeys'] = ($bKeys ? True : False)
   $mSlideshow['Keys'] = $mKeys
-  $mSlideshow['User32'] = $fKeys ? DllOpen('user32.dll') : Null
+  $mSlideshow['User32'] = $bKeys ? DllOpen('user32.dll') : Null
   $mSlideshow['LastUpdate'] = TimerInit()
   $mSlideshow['LastEvent'] = TimerInit()
 
@@ -476,10 +476,10 @@ Func __GetLocalImages(ByRef $avImage, $iCount, $iWidth, $iHeight)
   Next
 EndFunc
 
-Func __GetImagesFromResource(ByRef $avImage, $iCount, $iWidth, $iHeight, $fDownload = False)
+Func __GetImagesFromResource(ByRef $avImage, $iCount, $iWidth, $iHeight, $bDownload = False)
   Local $nIndex, $hImage, $hBitmap, $hGraphics, $aDim
   For $nIndex = 0 To $iCount - 1
-    If $fDownload Then
+    If $bDownload Then
       $avImage[$nIndex] = InetRead($avImage[$nIndex], 1)
       If @error Then
         $avImage[$nIndex] = Null
